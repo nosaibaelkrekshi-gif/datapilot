@@ -1,0 +1,19 @@
+# Environnement virtuel
+.venv/
+
+# Caches Python et pytest
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Journal brut des appels LLM (volumineux, regenere a chaque execution)
+logs/llm_exchanges.jsonl
+
+# Sauvegardes
+*.bak
+*_tmp.md
+
+# Systeme / editeur
+.vscode/
+.DS_Store
+Thumbs.db
