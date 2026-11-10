@@ -614,8 +614,7 @@ Outils utilisés (essai 3) :
 | 5 | Clients actifs | search_docs → query_database → query_database |
 | 6 | Dont VIP ? | search_docs × 5 (aucune requête SQL), puis réponse forcée |
 
-Les requêtes SQL fautives sont détaillées dans « Améliorations apportées au prompt » ci-dessous
-et dans l'analyse de l'étape 11.
+Les requêtes SQL fautives sont détaillées dans « Améliorations apportées au prompt » 
 
 ### Améliorations apportées au prompt
 1. **Recettes SQL** pour le CA net, le panier moyen et les clients actifs (formules du glossaire
@@ -734,14 +733,15 @@ Trace de l'essai 2 (appel par appel) :
    question peut donner des réponses différentes d'un lancement à l'autre (constaté à l'étape 10 : 3 essais, 3 chemins différents). Le test passerait une fois, puis échouerait la fois suivante, sans que le code ait changé. Il serait aussi lent (≈ 12 s par appel) et dépendant d'Ollama.
 
 2. **Pourquoi les tokens lus augmentent au fil des étapes ?** À chaque étape, on ajoute au brouillon la
-   décision du LLM + l'OBSERVATION (résultat SQL, passages de documentation). Tout est renvoyé au LLM
-   à chaque appel. Exemple vu dans le journal : 2 421 → 2 610 → 2 831 → 3 083 → 3 341 → 3 631 tokens.
+   décision du LLM + l'OBSERVATION (résultat SQL, passages de documentation).
+   Tout est renvoyé au LLM  à chaque appel. Exemple : 2 421 → 2 610 → 2 831 → 3 083 → 3 341 → 3 631 tokens.
 
-3. **Durée moyenne et conséquences :** environ **12 s par appel** sur mon poste (CPU). Une question en
+4. **Durée moyenne et conséquences :** environ **12 s par appel** sur mon poste (CPU). Une question en
    3 étapes ≈ **36 s d'attente**. Pour l'interface, il faut donc : un **indicateur de chargement**,
-   l'affichage des **étapes** pour que l'utilisateur voie que l'agent travaille, et des exemples de questions simples. Un modèle plus petit ou un GPU réduiraient l'attente.
+   l'affichage des **étapes** pour que l'utilisateur voie que l'agent travaille, et des exemples de questions simples.
+   Un modèle plus petit ou un GPU réduiraient l'attente.
 
-4. **Un test vert garantit-il le bon CA ?** **Non.** Les tests utilisent un **faux LLM** dont les réponses
+6. **Un test vert garantit-il le bon CA ?** **Non.** Les tests utilisent un **faux LLM** dont les réponses
    sont écrites à l'avance : ils prouvent que la mécanique fonctionne (boucle, routage, lecture seule), pas que le vrai modèle écrira la bonne requête SQL. Seule une évaluation avec le vrai LLM et des valeurs de référence peut le vérifier.
 
 
