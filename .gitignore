@@ -17,3 +17,6 @@ logs/llm_exchanges.jsonl
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Archive du rendu
+*.zip

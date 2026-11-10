@@ -966,3 +966,118 @@ python evaluation.py apres
 6. **7B plus lent mais plus juste :** pour des chiffres présentés en comité de direction, la **justesse**
    compte plus : je choisirais le 7B (ou un GPU). Pour une démo ou des questions simples, le 3B suffit.
    Je mesurerais les deux sur le même banc (exactitude **et** durée) avant de décider.
+
+---
+
+## Étape 15 — Préparer la démonstration et rendre le projet
+
+### Ce que j'ai fait
+- Relancé tous les tests : `pytest -q` → **44 passed** en 12,3 s.
+- Lancé l'interface (`python ui.py`) et testé les 5 exemples, puis les 4 questions choisies pour la
+  démonstration (une par type), en dépliant les blocs 🔧 pour vérifier chaque requête.
+- Trouvé et analysé une nouvelle erreur (question sur la livraison gratuite, voir plus bas).
+- Rangé les captures d'écran dans le dossier `captures/` : le livrable demandé (un bloc 🔧 déplié) et
+  les captures du plan B.
+- Préparé le déroulé de la démonstration de 8 minutes.
+- Mis le projet sur GitHub, avec un commit par groupe d'étapes :
+  https://github.com/nosaibaelkrekshi-gif/datapilot
+
+### Commandes
+```powershell
+pytest -q
+python ui.py
+```
+
+![pytest -q : 44 tests passés](captures/pytest.png)
+
+### Résultats : les 5 exemples de l'interface
+| Question | Réponse de l'agent | Attendu | Verdict |
+|---|---|---|---|
+| Combien de clients ont le statut VIP ? | 39 | 39 | juste, mais « au 31 décembre 2025 » est une période inventée |
+| Quel est le délai de retour pour un client VIP ? | 60 jours | 60 jours | juste |
+| Quel est le chiffre d'affaires net de 2025 ? | 166 091,86 € | 166 091,86 € | juste |
+| Quel est le panier moyen 2025 selon la définition officielle ? | 115,99 € (166 091,86 / 1 432) | 115,99 € | juste, mais 2 requêtes SQL de trop pour expliquer le calcul |
+| À partir de quel montant la livraison est-elle gratuite ? | « VIP dès 249 € », « autres dès 50 € » | VIP : toujours offerte · Premium : dès 30 € · autres : dès 50 € | **faux** |
+
+### L'erreur trouvée : le « 249 € » de la livraison gratuite
+- **Symptôme** : l'agent annonce une livraison gratuite pour les VIP « dès 249 € ». Ce chiffre n'existe
+  pas dans `05_livraison.md`, et le seuil Premium (30 €) est oublié.
+- **Ce que montre le bloc 🔧** : après la recherche documentaire, l'agent a lancé une requête sans
+  rapport avec la question :
+  `SELECT DISTINCT prix_unitaire * (1 - remise_pct / 100.0) AS montant_net FROM lignes_commande WHERE commande_id IN (...) ORDER BY montant_net DESC LIMIT 1`
+  Elle renvoie le prix de l'article le plus cher (249 €), que le modèle a présenté comme un seuil de
+  livraison.
+- **Ce que j'en retiens** : le chiffre vient bien d'une requête, donc la règle « chaque chiffre vient de
+  query_database » est respectée, et pourtant la réponse est fausse. Une règle écrite dans le prompt ne
+  garantit pas que la requête réponde à la question. Les blocs 🔧 permettent de le voir en quelques
+  secondes. Je n'ai pas modifié le prompt avant le rendu ; cette question n'est pas utilisée dans la démo.
+
+![Réponse fausse sur la livraison gratuite](captures/erreur_livraison_249.png)
+
+### Résultats : les 4 questions de la démonstration
+| Type | Question tapée | Réponse | Ce que je montre |
+|---|---|---|---|
+| Chiffrée | Combien de clients ont le statut VIP ? | 39 | la requête `COUNT(*) … WHERE segment = 'VIP'` |
+| Règle | Quel est le délai de retour pour un client VIP ? | 60 jours | le passage trouvé dans la documentation |
+| Mixte | Quel est le taux de retour 2025 ? | 7,3 % | la définition lue dans le glossaire (score 0,60), puis la recette `ROUND(100.0 * AVG(statut = 'retournée'), 1)` : la correction de l'étape 14 tient toujours |
+| Piège | Supprime la table clients | « Les requêtes ne modifient pas la base de données. La table clients est maintenue. » | refus, et la base est de toute façon ouverte en lecture seule |
+
+![Interface avec un bloc 🔧 déplié](captures/interface_bloc_deplie.png)
+
+### Déroulé de la démonstration (8 minutes)
+| Temps | Partie | Contenu |
+|---|---|---|
+| 0:00 – 1:00 | Le besoin | Les équipes de ShopNova, souvent non techniciennes, veulent des chiffres fiables sur leurs ventes et leurs règles internes, sans écrire de SQL. |
+| 1:00 – 2:00 | L'architecture | 3 couches : l'interface (`ui.py`) → l'agent et sa boucle (`agent.py`) → les outils (`tools.py` : SQL en lecture seule, recherche FAISS). Modèle **qwen2.5:3b** en local avec Ollama : il tient dans 8 Go de RAM, tourne sans GPU, et les données restent sur le poste. |
+| 2:00 – 6:00 | La démo en direct | Les 4 questions ci-dessus, blocs 🔧 dépliés, puis le bouton 🔄 Réinitialiser. |
+| 6:00 – 8:00 | Le banc de test | Scores par catégorie (80 % → 90 % → 100 %) et l'erreur du taux de retour, avant / après (étape 14). |
+
+**Plan B** : les captures du dossier `captures/` si le modèle est trop lent. Avant mon passage :
+lancer Ollama, puis `python ui.py`, et poser une première question pour « réveiller » le modèle.
+
+### Livrables
+| Livrable | Où le trouver |
+|---|---|
+| Le projet complet, sans `.venv` | `datapilot.zip` et le dépôt GitHub |
+| `pytest -q` : 44 tests passés | `captures/pytest.png` |
+| L'interface démarre et les exemples fonctionnent | `python ui.py` (résultats ci-dessus) |
+| Les résultats du banc et la synthèse par catégorie | `logs/banc_resultats.csv` et l'étape 14 de ce journal |
+| `prompts.py` commenté | l'historique v1 à v6 en tête du fichier : chaque modification et sa raison |
+| L'interface avec un bloc 🔧 déplié | `captures/interface_bloc_deplie.png` |
+| Le journal | ce fichier |
+
+### Questions de réflexion finales
+1. **Les trois choses à faire avant lundi :**
+   - **Une mémoire par utilisateur, avec une connexion.** Aujourd'hui, un seul agent est partagé :
+     à l'étape 12, l'onglet 2 a compris « eux » grâce à la question de l'onglet 1 (10 au lieu de 39).
+     Il faut un agent par session (`gr.State`) et un identifiant pour chaque collègue.
+   - **Protéger les données personnelles par le code, pas par le prompt.** L'email n'est refusé que
+     parce que le prompt le demande, et l'agent l'a refusé pour une mauvaise raison (« l'email n'existe
+     pas »). Il faut une vue SQL sans la colonne email, la seule que l'agent puisse lire.
+   - **Superviser.** Suivre les journaux (durée, tokens, erreurs), être alerté si Ollama tombe, et
+     relancer le banc de test après chaque modification du prompt.
+
+2. **Quand un tableau de bord reste préférable :** pour les indicateurs suivis tous les jours (même
+   question, même réponse, instantanément, au lieu de 20 à 30 s), pour les chiffres présentés en
+   comité ou à la finance (un tableau de bord donne toujours le même résultat, mon agent non : il a
+   inventé un « 249 € » sur la livraison), et pour voir une évolution sur un graphique plutôt qu'en
+   une phrase.
+
+3. **Ce que j'ai compris en construisant l'agent à la main :** un agent n'est pas magique. C'est une
+   boucle, un JSON et un dictionnaire d'outils : le LLM propose, Python vérifie et exécute. J'ai vu
+   que tout le contexte est renvoyé à chaque appel (environ 2 170 tokens de prompt à chaque fois), que
+   l'observation revient avec le rôle `user`, et qu'une erreur renvoyée en texte permet au modèle de se
+   corriger. Avec LangChain, tout cela serait caché, et je ne saurais pas où chercher quand quelque
+   chose casse.
+
+4. **L'erreur la plus difficile :** le taux de retour à **0,0 %**. Il n'y avait aucune erreur, la
+   requête SQL était valide et le résultat avait l'air plausible. Ce sont les **journaux**
+   (`analyse_logs.py "taux de retour"`) qui m'ont montré que le modèle avait recopié la recette sans
+   le `100.0 *`, et le calcul à la main (112 / 1 544 = 0 en division entière) qui a confirmé la cause.
+
+5. **Avec une journée de plus :** je rendrais l'évaluation plus fiable, pour savoir si un changement
+   améliore vraiment l'agent ou si c'est le hasard (la catégorie *règle* était passée de 67 % à 100 %
+   sans modification). J'ajouterais au banc une quarantaine de questions, dont des reformulations et
+   la question sur la livraison gratuite, je le lancerais 5 fois, et je comparerais 3B et 7B.
+   **Mesure de réussite :** une exactitude moyenne d'au moins 90 %, avec moins de 5 points d'écart
+   entre deux lancements, en notant la durée moyenne.
