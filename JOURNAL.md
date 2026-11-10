@@ -625,14 +625,13 @@ Les requêtes SQL fautives sont détaillées dans « Améliorations apportées a
 3. **RÈGLE 2** : « toujours utiliser search_docs pour une règle ou un délai » + un 3e exemple
    → corrige la régression de l'essai 2 (« je n'ai pas d'information » sans chercher).
 
-> Remarque : les recettes SQL donnent des formules générales, pas les réponses.
-> Elles améliorent
-> l'agent sur ces indicateurs, mais rendent le résultat dépendant du prompt.
+> Les recettes SQL donnent des formules générales, pas les réponses.
+> Elles améliorent l'agent sur ces indicateurs, mais rendent le résultat dépendant du prompt.
 
 ### Erreurs observées et explications
 - **Le modèle n'est pas déterministe** : la même question suit des chemins différents d'un essai à l'autre.
 - **Régression** : une règle ajoutée pour corriger un problème en a créé un autre (essai 2, question 3).
-  → D'où l'intérêt d'un banc de test automatique (étape 14).
+  → D'où l'intérêt d'un banc de test automatique .
 - **Calcul de tête** (question 4, essai 3) : le LLM a fait la division lui-même et mal arrondi
   (115,98 au lieu de 115,99) → les calculs doivent être faits dans le SQL.
 - **Boucles** (question 6) : 5 requêtes presque identiques (essai 2) ou 5 search_docs (essai 3).
