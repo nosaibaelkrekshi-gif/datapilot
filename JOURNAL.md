@@ -1,7 +1,11 @@
 # Carnet de bord — DataPilot
 
 **Binôme :** Nosaiba Elkrekshi 
+
+
 **Module :** Concevoir un chatbot / agent Data — Nexa Digital School, M2 Data & IA
+
+
 **Modèle utilisé :** qwen2.5:3b (Ollama, en local)
 
 ---
