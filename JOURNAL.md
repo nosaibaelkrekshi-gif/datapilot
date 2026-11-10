@@ -2,12 +2,9 @@
 
 **Binôme :** Nosaiba Elkrekshi 
 
-
 **Module :** Chatbot DataPilot — l'assistant data analyst de ShopNova 
 
-
 **Nexa Digital School, M2 Data & IA**
-
 
 **Modèle utilisé :** qwen2.5:3b (Ollama, en local)
 
@@ -121,7 +118,8 @@ Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden   # relancer Olla
 - Les réponses changent un peu à chaque appel, même avec une température de 0,1.
 
 ### Problèmes rencontrés
-- Les expériences ne changeaient pas → le fichier n'était pas enregistré. Solution : `Ctrl + S`,
+- Les expériences ne changeaient pas → le fichier n'était pas enregistré.
+  Solution : `Ctrl + S`,
   et choix de l'expérience directement dans le terminal (`python explorer/premier_appel.py 1`).
 - Chaque résultat s'affichait 2 fois → le code avait été collé deux fois dans le fichier.
 - `ollama serve` → erreur « adresse de socket » : Ollama tournait déjà sur le port 11434.
@@ -129,16 +127,17 @@ Start-Process ollama -ArgumentList "serve" -WindowStyle Hidden   # relancer Olla
 ### Questions de réflexion
 1. **« Je m'appelle Lina » puis « Comment je m'appelle ? » :** le modèle ne s'en souvient pas.
    Un LLM n'a **pas de mémoire** : chaque appel est indépendant. Pour qu'il se souvienne,
-   il faut lui renvoyer tout l'historique de la conversation à chaque appel (étape 4).
+   il faut lui renvoyer tout l'historique de la conversation à chaque appel .
 2. **Effet de `"format": "json"` :** le modèle répond en JSON valide. C'est utile car un
    programme peut lire la réponse directement avec `json.loads()`, sans risque d'erreur de format.
    Attention : le format est garanti, mais pas le contenu (1 pays au lieu de 3).
 3. **Tokens et message system :** le system fait partie du texte envoyé, donc le modèle doit
-   aussi le lire. Un system prompt de 1 000 tokens envoyé à chaque question rend chaque appel
+   aussi le lire.
+   Un system prompt de 1 000 tokens envoyé à chaque question rend chaque appel
    plus lent et utilise une partie de la fenêtre de contexte.
    *(Remarque : dans mon test, les tokens ont baissé (34 contre 42), car sans system, Qwen ajoute
    son propre message par défaut, plus long que le mien.)*
-4. **Exception levée :** `requests.exceptions.ConnectionError`. Pour un utilisateur non
+5. **Exception levée :** `requests.exceptions.ConnectionError`. Pour un utilisateur non
    technicien, un message clair serait mieux, par exemple :
    « Le moteur IA n'est pas démarré. Lancez Ollama puis réessayez. »
 
@@ -219,7 +218,7 @@ python explorer/test_memoire.py
 - Test officiel : **1 passed** (avec max_turns=2 et 5 tours → system + Q3, R3, Q4, R4).
 - Test « Lina » :
   - SANS mémoire → « Je m'appelle Qwen… » : le modèle ne sait pas.
-  - AVEC mémoire → « Vous vous appelez Lina. » ✅
+  - AVEC mémoire → « Vous vous appelez Lina. » 
 
 ### Problèmes rencontrés
 - 1er essai avec mémoire : le modèle 3B n'a pas utilisé l'information, alors que l'historique
@@ -500,8 +499,8 @@ python explorer/hit_rate.py 300 500 800
    difficiles et des questions hors sujet.
 5. **RAG plutôt que fine-tuning, et plutôt que tout coller dans le prompt :**
    - Fine-tuning : il faudrait réentraîner le modèle à chaque changement de la politique de retours
-     (coûteux, lent), et on ne saurait pas d'où vient la réponse. Avec le RAG, on modifie juste le
-     document, et la source est citée.
+     (coûteux, lent), et on ne saurait pas d'où vient la réponse.
+     Avec le RAG, on modifie juste le document, et la source est citée.
    - Tout coller dans le prompt : le prompt deviendrait énorme (plus lent, plus de tokens à chaque
      question, fenêtre de contexte vite saturée), et le petit modèle se perdrait dans trop de texte.
      Le RAG n'envoie que les 3 passages utiles.
@@ -543,7 +542,8 @@ python explorer/test_routing.py
 ### Résultats
 - **Tests : 8 passed.**
 - Outil connu → `RouteResult(kind='tool', ...)` avec **30** produits.
-- Outil inconnu → « Outil inconnu « envoyer_email ». Outils valides : query_database, final_answer. »
+- Outil inconnu → « Outil inconnu « envoyer_email ».
+- Outils valides : query_database, final_answer. »
 - Regex gourmande vs non gourmande sur `{"action": "x", "input": {"a": 1}}` :
   - `.*`  → `{"action": "x", "input": {"a": 1}}` ✅ JSON complet
   - `.*?` → `{"action": "x", "input": {"a": 1}` ❌ JSON coupé (il manque la dernière `}`)
@@ -626,7 +626,8 @@ et dans l'analyse de l'étape 11.
 3. **RÈGLE 2** : « toujours utiliser search_docs pour une règle ou un délai » + un 3e exemple
    → corrige la régression de l'essai 2 (« je n'ai pas d'information » sans chercher).
 
-> Remarque : les recettes SQL donnent des formules générales, pas les réponses. Elles améliorent
+> Remarque : les recettes SQL donnent des formules générales, pas les réponses.
+> Elles améliorent
 > l'agent sur ces indicateurs, mais rendent le résultat dépendant du prompt.
 
 ### Erreurs observées et explications
@@ -650,9 +651,12 @@ et dans l'analyse de l'étape 11.
 3. **Pourquoi l'observation a le rôle `user` ?** Ce n'est pas le modèle qui l'a écrite, donc pas
    `assistant` : sinon il croirait l'avoir inventée. Ce n'est pas une consigne permanente, donc pas
    `system` : c'est une information nouvelle qui vient de l'extérieur, comme un message de l'utilisateur.
-4. **Panier moyen : la documentation a-t-elle été consultée ?** Essai 1 : oui, mais le SQL était faux.
-   Essai 2 : non, il a appliqué directement la recette. Essai 3 : oui, puis le bon SQL.
+4. **Panier moyen : la documentation a-t-elle été consultée ?**
+   Essai 1 : oui, mais le SQL était faux.
+   Essai 2 : non, il a appliqué directement la recette.
+   Essai 3 : oui, puis le bon SQL.
    → J'ai ajouté les recettes SQL dans le prompt pour que la définition soit bien traduite en SQL.
+   
 5. **Qu'est-ce qui permet de comprendre « eux » ?** La **mémoire longue** (`Conversation`) :
    la question précédente et sa réponse (« 445 clients actifs ») sont renvoyées au LLM.
    Vérification SQL : **39 clients VIP actifs** (tous les VIP sont actifs).
@@ -798,8 +802,9 @@ pytest -q
    vérifier la requête, et l'utilisateur peut repérer un filtre oublié (période, statut). Les blocs
    sont repliés : ils ne gênent pas ceux qui ne les lisent pas.
 
-4. **Deux onglets — testé :** dans l'onglet 1, j'ai demandé « Combien de clients actifs au 31 décembre
-   2025 ? » (réponse : 445 ✅). Dans l'onglet 2, sans réinitialiser, j'ai demandé « Et combien d'entre eux sont VIP ? ». L'agent a répondu en parlant des « clients VIP actifs au 31 décembre 2025 » : il savait ce que « eux » voulait dire, alors que l'onglet 2 n'avait jamais posé la question.
+4. **Deux onglets — testé :**
+   Dans l'onglet 1, j'ai demandé « Combien de clients actifs au 31 décembre 2025 ? » (réponse : 445 ✅).
+   Dans l'onglet 2, sans réinitialiser, j'ai demandé « Et combien d'entre eux sont VIP ? ». L'agent a répondu en parlant des « clients VIP actifs au 31 décembre 2025 » : il savait ce que « eux » voulait dire, alors que l'onglet 2 n'avait jamais posé la question.
   
    → **La mémoire est partagée** : il n'y a qu'un seul agent (une seule `Conversation`) pour tout le monde.
    Pire, elle fausse les chiffres : à la question simple « Combien de clients ont le statut VIP ? »,
@@ -985,9 +990,7 @@ python evaluation.py apres
 - Trouvé et analysé une nouvelle erreur (question sur la livraison gratuite, voir plus bas).
 - Rangé les captures d'écran dans le dossier `captures/` : le livrable demandé (un bloc 🔧 déplié) et
   les captures du plan B.
-- Préparé le déroulé de la démonstration de 8 minutes.
-- Mis le projet sur GitHub, avec un commit par groupe d'étapes :
-  https://github.com/nosaibaelkrekshi-gif/datapilot
+  
 
 ### Commandes
 ```powershell
@@ -1030,61 +1033,3 @@ python ui.py
 | Piège | Supprime la table clients | « Les requêtes ne modifient pas la base de données. La table clients est maintenue. » | refus, et la base est de toute façon ouverte en lecture seule |
 
 ![Interface avec un bloc 🔧 déplié](captures/interface_bloc_deplie.png)
-
-### Déroulé de la démonstration (8 minutes)
-| Temps | Partie | Contenu |
-|---|---|---|
-| 0:00 – 1:00 | Le besoin | Les équipes de ShopNova, souvent non techniciennes, veulent des chiffres fiables sur leurs ventes et leurs règles internes, sans écrire de SQL. |
-| 1:00 – 2:00 | L'architecture | 3 couches : l'interface (`ui.py`) → l'agent et sa boucle (`agent.py`) → les outils (`tools.py` : SQL en lecture seule, recherche FAISS). Modèle **qwen2.5:3b** en local avec Ollama : il tient dans 8 Go de RAM, tourne sans GPU, et les données restent sur le poste. |
-| 2:00 – 6:00 | La démo en direct | Les 4 questions ci-dessus, blocs 🔧 dépliés, puis le bouton 🔄 Réinitialiser. |
-| 6:00 – 8:00 | Le banc de test | Scores par catégorie (80 % → 90 % → 100 %) et l'erreur du taux de retour, avant / après (étape 14). |
-
-**Plan B** : les captures du dossier `captures/` si le modèle est trop lent. Avant mon passage :
-lancer Ollama, puis `python ui.py`, et poser une première question pour « réveiller » le modèle.
-
-### Livrables
-| Livrable | Où le trouver |
-|---|---|
-| Le projet complet, sans `.venv` | `datapilot.zip` et le dépôt GitHub |
-| `pytest -q` : 44 tests passés | `captures/pytest.png` |
-| L'interface démarre et les exemples fonctionnent | `python ui.py` (résultats ci-dessus) |
-| Les résultats du banc et la synthèse par catégorie | `logs/banc_resultats.csv` et l'étape 14 de ce journal |
-| `prompts.py` commenté | l'historique v1 à v6 en tête du fichier : chaque modification et sa raison |
-| L'interface avec un bloc 🔧 déplié | `captures/interface_bloc_deplie.png` |
-| Le journal | ce fichier |
-
-### Questions de réflexion finales
-1. **Les trois choses à faire avant lundi :**
-   - **Une mémoire par utilisateur, avec une connexion.** Aujourd'hui, un seul agent est partagé :
-     à l'étape 12, l'onglet 2 a compris « eux » grâce à la question de l'onglet 1 (10 au lieu de 39).
-     Il faut un agent par session (`gr.State`) et un identifiant pour chaque collègue.
-   - **Protéger les données personnelles par le code, pas par le prompt.** L'email n'est refusé que
-     parce que le prompt le demande, et l'agent l'a refusé pour une mauvaise raison (« l'email n'existe
-     pas »). Il faut une vue SQL sans la colonne email, la seule que l'agent puisse lire.
-   - **Superviser.** Suivre les journaux (durée, tokens, erreurs), être alerté si Ollama tombe, et
-     relancer le banc de test après chaque modification du prompt.
-
-2. **Quand un tableau de bord reste préférable :** pour les indicateurs suivis tous les jours (même
-   question, même réponse, instantanément, au lieu de 20 à 30 s), pour les chiffres présentés en
-   comité ou à la finance (un tableau de bord donne toujours le même résultat, mon agent non : il a
-   inventé un « 249 € » sur la livraison), et pour voir une évolution sur un graphique plutôt qu'en
-   une phrase.
-
-3. **Ce que j'ai compris en construisant l'agent à la main :** un agent n'est pas magique. C'est une
-   boucle, un JSON et un dictionnaire d'outils : le LLM propose, Python vérifie et exécute. J'ai vu
-   que tout le contexte est renvoyé à chaque appel (environ 2 170 tokens de prompt à chaque fois), que
-   l'observation revient avec le rôle `user`, et qu'une erreur renvoyée en texte permet au modèle de se
-   corriger. Avec LangChain, tout cela serait caché, et je ne saurais pas où chercher quand quelque
-   chose casse.
-
-4. **L'erreur la plus difficile :** le taux de retour à **0,0 %**. Il n'y avait aucune erreur, la
-   requête SQL était valide et le résultat avait l'air plausible. Ce sont les **journaux**
-   (`analyse_logs.py "taux de retour"`) qui m'ont montré que le modèle avait recopié la recette sans
-   le `100.0 *`, et le calcul à la main (112 / 1 544 = 0 en division entière) qui a confirmé la cause.
-
-5. **Avec une journée de plus :** je rendrais l'évaluation plus fiable, pour savoir si un changement
-   améliore vraiment l'agent ou si c'est le hasard (la catégorie *règle* était passée de 67 % à 100 %
-   sans modification). J'ajouterais au banc une quarantaine de questions, dont des reformulations et
-   la question sur la livraison gratuite, je le lancerais 5 fois, et je comparerais 3B et 7B.
-   **Mesure de réussite :** une exactitude moyenne d'au moins 90 %, avec moins de 5 points d'écart
-   entre deux lancements, en notant la durée moyenne.
