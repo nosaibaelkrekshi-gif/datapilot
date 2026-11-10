@@ -3,7 +3,10 @@
 **Binôme :** Nosaiba Elkrekshi 
 
 
-**Module :** Concevoir un chatbot / agent Data — Nexa Digital School, M2 Data & IA
+**Module :** Chatbot DataPilot — l'assistant data analyst de ShopNova 
+
+
+**Nexa Digital School, M2 Data & IA**
 
 
 **Modèle utilisé :** qwen2.5:3b (Ollama, en local)
